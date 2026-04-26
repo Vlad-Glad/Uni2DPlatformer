@@ -142,6 +142,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerHealth
   maxHealth: 3
+  damageCooldown: 0.5
 --- !u!1001 &833489300
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -775,7 +776,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4346195368092420466, guid: d61b2946725a4e64f93fd53cbd3645f1, type: 3}
       propertyPath: m_Enabled
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4346195368092420466, guid: d61b2946725a4e64f93fd53cbd3645f1, type: 3}
       propertyPath: m_Offset.x
@@ -784,6 +785,22 @@ PrefabInstance:
     - target: {fileID: 4346195368092420466, guid: d61b2946725a4e64f93fd53cbd3645f1, type: 3}
       propertyPath: m_Offset.y
       value: -0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8742675713907715202, guid: d61b2946725a4e64f93fd53cbd3645f1, type: 3}
+      propertyPath: m_Size.x
+      value: 0.121160984
+      objectReference: {fileID: 0}
+    - target: {fileID: 8742675713907715202, guid: d61b2946725a4e64f93fd53cbd3645f1, type: 3}
+      propertyPath: m_Size.y
+      value: 0.1944427
+      objectReference: {fileID: 0}
+    - target: {fileID: 8742675713907715202, guid: d61b2946725a4e64f93fd53cbd3645f1, type: 3}
+      propertyPath: m_Offset.x
+      value: -0.015367167
+      objectReference: {fileID: 0}
+    - target: {fileID: 8742675713907715202, guid: d61b2946725a4e64f93fd53cbd3645f1, type: 3}
+      propertyPath: m_Offset.y
+      value: -0.062724836
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

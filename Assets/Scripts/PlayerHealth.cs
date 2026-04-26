@@ -4,24 +4,38 @@ using UnityEngine;
 public class PlayerHealth : MonoBehaviour
 {
     [SerializeField] private int maxHealth = 3;
+    [SerializeField] private float damageCooldown = 0f;
 
     private int currentHealth;
+    private float lastDamageTime;
+
+    public int CurrentHealth => currentHealth;
+    public float MaxHealth => maxHealth;
 
     private void Awake()
     {
         currentHealth = maxHealth;
     }
 
-    public void TakeDamage(int damage)
+    public bool TakeDamage(int damage)
     {
+
+        if (Time.time < lastDamageTime + damageCooldown)
+        {
+            return false;
+        }
+
+        lastDamageTime = Time.time;
+
         currentHealth -= damage;
-
-        Debug.Log("Player took damage. Health: " + currentHealth);
-
+        currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
+        
         if (currentHealth <= 0)
         {
             Die();
         }
+
+        return true;
     }
 
     private void Die()
