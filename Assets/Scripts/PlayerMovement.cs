@@ -1,6 +1,4 @@
 using UnityEngine;
-using UnityEngine.InputSystem;
-using static UnityEngine.Rendering.DebugUI;
 
 public class PlayerMovement : MonoBehaviour
 {
@@ -10,6 +8,7 @@ public class PlayerMovement : MonoBehaviour
     private Rigidbody2D rb;
     private float moveInput;
     private bool isGrounded;
+    private bool jumpPressed;
 
     private void Awake()
     {
@@ -20,38 +19,63 @@ public class PlayerMovement : MonoBehaviour
     {
         moveInput = Input.GetAxisRaw("Horizontal");
 
-        if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
+        if (Input.GetKeyDown(KeyCode.Space))
         {
-            Jump();
+            jumpPressed = true;
         }
     }
 
     private void FixedUpdate()
     {
         rb.linearVelocity = new Vector2(moveInput * moveSpeed, rb.linearVelocity.y);
+
+        if (jumpPressed && isGrounded)
+        {
+            Jump();
+        }
+
+        jumpPressed = false;
     }
 
-
-    public void Jump()
+    private void Jump()
     {
         rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
+        isGrounded = false;
     }
-
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        if (collision.gameObject.CompareTag("Ground"))
-        {
-            isGrounded = true;
-        }
+        CheckGroundCollision(collision);
     }
-    
+
+    private void OnCollisionStay2D(Collision2D collision)
+    {
+        CheckGroundCollision(collision);
+    }
 
     private void OnCollisionExit2D(Collision2D collision)
     {
         if (collision.gameObject.CompareTag("Ground"))
         {
             isGrounded = false;
+        }
+    }
+
+    private void CheckGroundCollision(Collision2D collision)
+    {
+        if (!collision.gameObject.CompareTag("Ground"))
+        {
+            return;
+        }
+
+        foreach (ContactPoint2D contact in collision.contacts)
+        {
+            // normal.y > 0.5 означає, що земля знаходиться під персонажем
+            if (contact.normal.y > 0.5f)
+            {
+                isGrounded = true;
+                return;
+            }
         }
     }
 }
