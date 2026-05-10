@@ -32,7 +32,16 @@ public class HeartPickup : MonoBehaviour
         }
 
         collected = true;
-        playerHealth.Heal(healAmount);
+
+        if (playerHealth.CurrentHealth >= playerHealth.MaxHealth)
+        {
+            playerHealth.AddMaxHealth(healAmount);
+        }
+        else
+        {
+            playerHealth.Heal(healAmount);
+        }
+
         Destroy(gameObject);
     }
 }

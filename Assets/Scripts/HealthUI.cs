@@ -47,7 +47,7 @@ public class HealthUI : MonoBehaviour
         EnsureHeartCount(visibleHeartCount);
         UpdateHeartPositions();
         UpdateHeartIcons(currentHealth);
-        UpdateHealthText(currentHealth, maxHealth);
+        UpdateHealthText(currentHealth);
     }
 
     public void SetVisible(bool isVisible)
@@ -101,13 +101,13 @@ public class HealthUI : MonoBehaviour
         }
     }
 
-    private void UpdateHealthText(int currentHealth, int maxHealth)
+    private void UpdateHealthText(int currentHealth)
     {
         if (healthText == null)
         {
             return;
         }
 
-        healthText.text = currentHealth + " / " + maxHealth;
+        healthText.text = "Healths: " + currentHealth;
     }
 }
