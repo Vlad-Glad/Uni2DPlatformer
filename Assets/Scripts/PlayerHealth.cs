@@ -7,14 +7,12 @@ public class PlayerHealth : MonoBehaviour
     [SerializeField] private int maxHealth = 3;
     [SerializeField] private float damageCooldown = 0.5f;
 
-    [Header("UI")]
-    [SerializeField] private HealthUI healthUI;
-
     [Header("Hit Flash")]
     [SerializeField] private float flashDuration = 0.2f;
     [SerializeField] private Color flashColor = Color.red;
 
     private int currentHealth;
+    private HealthUI healthUI;
     private float lastDamageTime;
     private SpriteRenderer spriteRenderer;
     private Color originalColor = Color.white;

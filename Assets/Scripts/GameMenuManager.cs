@@ -9,8 +9,8 @@ public class GameMenuManager : MonoBehaviour
     public static GameMenuManager Instance { get; private set; }
 
     [Header("Scene Names")]
-    [SerializeField] private string startMenuSceneName = "MenuScene";
-    [SerializeField] private string firstLevelSceneName = "Step1_Test";
+    [SerializeField] private string startMenuSceneName = "Menu";
+    [SerializeField] private string firstLevelSceneName = "Level1_Layout";
 
     [Header("Menu UI")]
     [SerializeField] private GameObject menuPanel;
