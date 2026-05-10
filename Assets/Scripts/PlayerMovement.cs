@@ -2,17 +2,32 @@ using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
+    [Header("Movement")]
     [SerializeField] private float moveSpeed = 6f;
+
+    [Header("Jump")]
     [SerializeField] private float jumpForce = 12f;
 
+    [Header("Ground Check")]
+    [SerializeField] private Transform groundCheck;
+    [SerializeField] private float groundCheckRadius = 0.2f;
+    [SerializeField] private LayerMask groundLayer;
+
+    [Header("Flip")]
+    [SerializeField] private bool isFacingRight = true;
+
     private Rigidbody2D rb;
+    private Collider2D[] playerColliders;
     private float moveInput;
-    private bool isGrounded;
     private bool jumpPressed;
+    private static PhysicsMaterial2D noFrictionMaterial;
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
+        playerColliders = GetComponents<Collider2D>();
+
+        ApplyNoFrictionMaterial();
     }
 
     private void Update()
@@ -23,13 +38,15 @@ public class PlayerMovement : MonoBehaviour
         {
             jumpPressed = true;
         }
+
+        Flip();
     }
 
     private void FixedUpdate()
     {
-        rb.linearVelocity = new Vector2(moveInput * moveSpeed, rb.linearVelocity.y);
+        Move();
 
-        if (jumpPressed && isGrounded)
+        if (jumpPressed && IsGrounded())
         {
             Jump();
         }
@@ -37,45 +54,77 @@ public class PlayerMovement : MonoBehaviour
         jumpPressed = false;
     }
 
+    private void Move()
+    {
+        rb.linearVelocity = new Vector2(
+            moveInput * moveSpeed,
+            rb.linearVelocity.y
+        );
+    }
+
     private void Jump()
     {
-        rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
-        isGrounded = false;
+        rb.linearVelocity = new Vector2(
+            rb.linearVelocity.x,
+            jumpForce
+        );
     }
 
-    private void OnCollisionEnter2D(Collision2D collision)
+    private bool IsGrounded()
     {
-        CheckGroundCollision(collision);
-    }
-
-    private void OnCollisionStay2D(Collision2D collision)
-    {
-        CheckGroundCollision(collision);
-    }
-
-    private void OnCollisionExit2D(Collision2D collision)
-    {
-        if (collision.gameObject.CompareTag("Ground"))
+        if (groundCheck == null)
         {
-            isGrounded = false;
+            return false;
         }
+
+        return Physics2D.OverlapCircle(
+            groundCheck.position,
+            groundCheckRadius,
+            groundLayer
+        );
     }
 
-    private void CheckGroundCollision(Collision2D collision)
+    private void Flip()
     {
-        if (!collision.gameObject.CompareTag("Ground"))
+        if (moveInput == 0f)
         {
             return;
         }
 
-        foreach (ContactPoint2D contact in collision.contacts)
+        if ((isFacingRight && moveInput < 0f) || (!isFacingRight && moveInput > 0f))
         {
-            // normal.y > 0.5 означає, що земля знаходиться під персонажем
-            if (contact.normal.y > 0.5f)
-            {
-                isGrounded = true;
-                return;
-            }
+            isFacingRight = !isFacingRight;
+
+            Vector3 localScale = transform.localScale;
+            localScale.x *= -1f;
+            transform.localScale = localScale;
         }
+    }
+
+    private void ApplyNoFrictionMaterial()
+    {
+        if (noFrictionMaterial == null)
+        {
+            noFrictionMaterial = new PhysicsMaterial2D("PlayerNoFriction")
+            {
+                friction = 0f,
+                bounciness = 0f
+            };
+        }
+
+        foreach (Collider2D playerCollider in playerColliders)
+        {
+            playerCollider.sharedMaterial = noFrictionMaterial;
+        }
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        if (groundCheck == null)
+        {
+            return;
+        }
+
+        Gizmos.DrawWireSphere(groundCheck.position, groundCheckRadius);
     }
 }

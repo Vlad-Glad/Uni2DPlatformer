@@ -1,5 +1,7 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.InputSystem.UI;
 using UnityEngine.SceneManagement;
 
 public class GameMenuManager : MonoBehaviour
@@ -19,6 +21,8 @@ public class GameMenuManager : MonoBehaviour
     [SerializeField] private GameObject resumeButton;
     [SerializeField] private GameObject exitToStartButton;
 
+    private EventSystem persistentEventSystem;
+    private InputSystemUIInputModule persistentInputModule;
     private bool isInGame;
     private bool isPaused;
 
@@ -36,6 +40,9 @@ public class GameMenuManager : MonoBehaviour
         }
 
         Instance = this;
+
+        persistentEventSystem = GetComponentInChildren<EventSystem>(true);
+        persistentInputModule = GetComponentInChildren<InputSystemUIInputModule>(true);
 
         DontDestroyOnLoad(gameObject);
 
@@ -81,6 +88,7 @@ public class GameMenuManager : MonoBehaviour
         isInGame = true;
         isPaused = false;
 
+        SetPersistentUiInputEnabled(false);
         menuPanel.SetActive(false);
 
         Time.timeScale = 1f;
@@ -140,6 +148,7 @@ public class GameMenuManager : MonoBehaviour
         isInGame = false;
         isPaused = true;
 
+        SetPersistentUiInputEnabled(true);
         menuPanel.SetActive(true);
 
         if (menuTitleText != null)
@@ -159,6 +168,7 @@ public class GameMenuManager : MonoBehaviour
         isInGame = true;
         isPaused = false;
 
+        SetPersistentUiInputEnabled(false);
         menuPanel.SetActive(false);
 
         Time.timeScale = 1f;
@@ -181,6 +191,19 @@ public class GameMenuManager : MonoBehaviour
         if (Instance == this)
         {
             SceneManager.sceneLoaded -= OnSceneLoaded;
+        }
+    }
+
+    private void SetPersistentUiInputEnabled(bool enabled)
+    {
+        if (persistentInputModule != null)
+        {
+            persistentInputModule.enabled = enabled;
+        }
+
+        if (persistentEventSystem != null)
+        {
+            persistentEventSystem.enabled = enabled;
         }
     }
 }

@@ -6,11 +6,23 @@ public class DamageDealer : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        PlayerHealth playerHealth = other.GetComponent<PlayerHealth>();
+        DealDamage(other.gameObject);
+    }
 
-        if (playerHealth != null)
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        DealDamage(collision.gameObject);
+    }
+
+    private void DealDamage(GameObject target)
+    {
+        PlayerHealth playerHealth = target.GetComponentInParent<PlayerHealth>();
+
+        if (playerHealth == null)
         {
-            playerHealth.TakeDamage(damage);
+            return;
         }
+
+        playerHealth.TakeDamage(damage);
     }
 }
