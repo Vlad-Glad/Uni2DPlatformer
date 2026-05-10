@@ -179,6 +179,8 @@ MonoBehaviour:
   minMoveDelta: 0.005
   groundCheck: {fileID: 4004002}
   groundCheckRadius: 0.2
+  ledgeCheckDistance: 0.45
+  ledgeCheckRadius: 0.08
   groundLayer:
     serializedVersion: 2
     m_Bits: 64

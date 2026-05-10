@@ -13,6 +13,8 @@ public class EnemyPatrol : MonoBehaviour
     [Header("Ground Check")]
     [SerializeField] private Transform groundCheck;
     [SerializeField] private float groundCheckRadius = 0.12f;
+    [SerializeField] private float ledgeCheckDistance = 0.45f;
+    [SerializeField] private float ledgeCheckRadius = 0.08f;
     [SerializeField] private LayerMask groundLayer;
 
     private Rigidbody2D rb;
@@ -56,6 +58,12 @@ public class EnemyPatrol : MonoBehaviour
             direction = 1;
         }
 
+        if (!HasGroundAhead())
+        {
+            direction *= -1;
+            ResetStuckCheck();
+        }
+
         rb.linearVelocity = new Vector2(direction * moveSpeed, rb.linearVelocity.y);
         UpdateFacing();
         ReverseIfStuck();
@@ -69,6 +77,17 @@ public class EnemyPatrol : MonoBehaviour
         }
 
         return Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
+    }
+
+    private bool HasGroundAhead()
+    {
+        if (groundCheck == null)
+        {
+            return false;
+        }
+
+        Vector2 ledgeCheckPosition = (Vector2)groundCheck.position + Vector2.right * direction * ledgeCheckDistance;
+        return Physics2D.OverlapCircle(ledgeCheckPosition, ledgeCheckRadius, groundLayer);
     }
 
     private void UpdateFacing()
@@ -137,6 +156,12 @@ public class EnemyPatrol : MonoBehaviour
         if (groundCheck != null)
         {
             Gizmos.DrawWireSphere(groundCheck.position, groundCheckRadius);
+
+            Vector3 leftLedgePoint = groundCheck.position + Vector3.left * ledgeCheckDistance;
+            Vector3 rightLedgePoint = groundCheck.position + Vector3.right * ledgeCheckDistance;
+
+            Gizmos.DrawWireSphere(leftLedgePoint, ledgeCheckRadius);
+            Gizmos.DrawWireSphere(rightLedgePoint, ledgeCheckRadius);
         }
     }
 }
