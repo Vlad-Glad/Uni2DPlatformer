@@ -23,6 +23,7 @@ public class GameMenuManager : MonoBehaviour
 
     private EventSystem persistentEventSystem;
     private InputSystemUIInputModule persistentInputModule;
+    private GameObject hudCanvas;
     private bool isInGame;
     private bool isPaused;
 
@@ -43,6 +44,7 @@ public class GameMenuManager : MonoBehaviour
 
         persistentEventSystem = GetComponentInChildren<EventSystem>(true);
         persistentInputModule = GetComponentInChildren<InputSystemUIInputModule>(true);
+        hudCanvas = transform.Find("HUDCanvas")?.gameObject;
 
         DontDestroyOnLoad(gameObject);
 
@@ -89,6 +91,7 @@ public class GameMenuManager : MonoBehaviour
         isPaused = false;
 
         SetPersistentUiInputEnabled(false);
+        SetHudVisible(true);
         menuPanel.SetActive(false);
 
         Time.timeScale = 1f;
@@ -105,6 +108,7 @@ public class GameMenuManager : MonoBehaviour
 
         isPaused = false;
 
+        SetHudVisible(true);
         menuPanel.SetActive(false);
 
         Time.timeScale = 1f;
@@ -149,6 +153,7 @@ public class GameMenuManager : MonoBehaviour
         isPaused = true;
 
         SetPersistentUiInputEnabled(true);
+        SetHudVisible(false);
         menuPanel.SetActive(true);
 
         if (menuTitleText != null)
@@ -169,6 +174,7 @@ public class GameMenuManager : MonoBehaviour
         isPaused = false;
 
         SetPersistentUiInputEnabled(false);
+        SetHudVisible(true);
         menuPanel.SetActive(false);
 
         Time.timeScale = 1f;
@@ -204,6 +210,14 @@ public class GameMenuManager : MonoBehaviour
         if (persistentEventSystem != null)
         {
             persistentEventSystem.enabled = enabled;
+        }
+    }
+
+    private void SetHudVisible(bool visible)
+    {
+        if (hudCanvas != null)
+        {
+            hudCanvas.SetActive(visible);
         }
     }
 }
