@@ -194,6 +194,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerHealth
   maxHealth: 3
   damageCooldown: 0.5
+  deathMenuSceneName: DeathMenu
+  fallDeathY: -8
   flashDuration: 0.2
   flashColor: {r: 1, g: 0, b: 0, a: 1}
 --- !u!1 &4370529352156655915

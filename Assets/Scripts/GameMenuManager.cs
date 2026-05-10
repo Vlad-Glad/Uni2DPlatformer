@@ -11,6 +11,7 @@ public class GameMenuManager : MonoBehaviour
     [Header("Scene Names")]
     [SerializeField] private string startMenuSceneName = "Menu";
     [SerializeField] private string firstLevelSceneName = "Level1_Layout";
+    [SerializeField] private string deathMenuSceneName = "DeathMenu";
 
     [Header("Menu UI")]
     [SerializeField] private GameObject menuPanel;
@@ -58,6 +59,10 @@ public class GameMenuManager : MonoBehaviour
         if (currentSceneName == startMenuSceneName)
         {
             ShowStartMenu();
+        }
+        else if (currentSceneName == deathMenuSceneName)
+        {
+            ShowExternalMenuScene();
         }
         else
         {
@@ -186,6 +191,10 @@ public class GameMenuManager : MonoBehaviour
         {
             ShowStartMenu();
         }
+        else if (scene.name == deathMenuSceneName)
+        {
+            ShowExternalMenuScene();
+        }
         else
         {
             EnterGameMode();
@@ -219,5 +228,17 @@ public class GameMenuManager : MonoBehaviour
         {
             hudCanvas.SetActive(visible);
         }
+    }
+
+    private void ShowExternalMenuScene()
+    {
+        isInGame = false;
+        isPaused = true;
+
+        SetPersistentUiInputEnabled(false);
+        SetHudVisible(false);
+        menuPanel.SetActive(false);
+
+        Time.timeScale = 0f;
     }
 }

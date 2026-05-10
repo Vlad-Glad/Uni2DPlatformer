@@ -1,11 +1,16 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class PlayerHealth : MonoBehaviour
 {
     [Header("Health")]
     [SerializeField] private int maxHealth = 3;
     [SerializeField] private float damageCooldown = 0.5f;
+    [SerializeField] private string deathMenuSceneName = "DeathMenu";
+
+    [Header("Fall Death")]
+    [SerializeField] private float fallDeathY = -8f;
 
     [Header("Hit Flash")]
     [SerializeField] private float flashDuration = 0.2f;
@@ -17,6 +22,7 @@ public class PlayerHealth : MonoBehaviour
     private SpriteRenderer spriteRenderer;
     private Color originalColor = Color.white;
     private Coroutine flashCoroutine;
+    private bool isDead;
 
     public int CurrentHealth => currentHealth;
     public int MaxHealth => maxHealth;
@@ -48,8 +54,21 @@ public class PlayerHealth : MonoBehaviour
         UpdateHealthUI();
     }
 
+    private void Update()
+    {
+        if (!isDead && transform.position.y <= fallDeathY)
+        {
+            Die();
+        }
+    }
+
     public bool TakeDamage(int damage)
     {
+        if (isDead)
+        {
+            return false;
+        }
+
         if (damage <= 0)
         {
             return false;
@@ -78,6 +97,11 @@ public class PlayerHealth : MonoBehaviour
 
     public void Heal(int amount)
     {
+        if (isDead)
+        {
+            return;
+        }
+
         if (amount <= 0)
         {
             return;
@@ -91,6 +115,11 @@ public class PlayerHealth : MonoBehaviour
 
     public void AddMaxHealth(int amount)
     {
+        if (isDead)
+        {
+            return;
+        }
+
         if (amount <= 0)
         {
             return;
@@ -145,6 +174,16 @@ public class PlayerHealth : MonoBehaviour
 
     private void Die()
     {
-        Debug.Log("Player died.");
+        if (isDead)
+        {
+            return;
+        }
+
+        isDead = true;
+        currentHealth = 0;
+        UpdateHealthUI();
+
+        PlayerPrefs.SetString("LastPlayedLevel", SceneManager.GetActiveScene().name);
+        SceneManager.LoadScene(deathMenuSceneName);
     }
 }
