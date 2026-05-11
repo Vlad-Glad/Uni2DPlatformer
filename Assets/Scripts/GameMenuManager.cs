@@ -113,6 +113,7 @@ public class GameMenuManager : MonoBehaviour
 
         isPaused = false;
 
+        SetPersistentUiInputEnabled(false);
         SetHudVisible(true);
         menuPanel.SetActive(false);
 
@@ -128,6 +129,7 @@ public class GameMenuManager : MonoBehaviour
 
         isPaused = true;
 
+        SetPersistentUiInputEnabled(true);
         menuPanel.SetActive(true);
 
         if (menuTitleText != null)
