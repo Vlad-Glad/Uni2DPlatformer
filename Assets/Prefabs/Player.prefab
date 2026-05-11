@@ -193,7 +193,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerHealth
   maxHealth: 3
-  damageCooldown: 0.5
+  damageCooldown: 0.05
   deathMenuSceneName: DeathMenu
   fallDeathY: -8
   flashDuration: 0.2
