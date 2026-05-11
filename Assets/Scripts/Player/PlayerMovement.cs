@@ -1,7 +1,10 @@
+using System;
 using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
+    public event Action FirstGrounded;
+
     [Header("Movement")]
     [SerializeField] private float moveSpeed = 6f;
 
@@ -20,7 +23,10 @@ public class PlayerMovement : MonoBehaviour
     private Collider2D[] playerColliders;
     private float moveInput;
     private bool jumpPressed;
+    private bool hasTouchedGround;
     private static PhysicsMaterial2D noFrictionMaterial;
+
+    public bool HasTouchedGround => hasTouchedGround;
 
     private void Awake()
     {
@@ -44,9 +50,17 @@ public class PlayerMovement : MonoBehaviour
 
     private void FixedUpdate()
     {
+        bool isGrounded = IsGrounded();
+
+        if (!hasTouchedGround && isGrounded)
+        {
+            hasTouchedGround = true;
+            FirstGrounded?.Invoke();
+        }
+
         Move();
 
-        if (jumpPressed && IsGrounded())
+        if (jumpPressed && isGrounded)
         {
             Jump();
         }

@@ -23,13 +23,15 @@ public class PlayerHealth : MonoBehaviour
     private Color originalColor = Color.white;
     private Coroutine flashCoroutine;
     private bool isDead;
+    private GameSession gameSession;
 
     public int CurrentHealth => currentHealth;
     public int MaxHealth => maxHealth;
 
     private void Awake()
     {
-        currentHealth = maxHealth;
+        gameSession = GameSession.GetOrCreate();
+        ApplySessionHealth();
 
         spriteRenderer = GetComponent<SpriteRenderer>();
 
@@ -46,6 +48,14 @@ public class PlayerHealth : MonoBehaviour
 
     private void Start()
     {
+        if (gameSession == null)
+        {
+            gameSession = GameSession.GetOrCreate();
+        }
+
+        gameSession.SetCurrentLevel(SceneManager.GetActiveScene().name);
+        ApplySessionHealth();
+
         if (healthUI == null)
         {
             healthUI = HealthUI.Instance;
@@ -84,6 +94,7 @@ public class PlayerHealth : MonoBehaviour
         currentHealth -= damage;
         currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
 
+        SaveHealthToSession();
         UpdateHealthUI();
         PlayHitFlash();
 
@@ -110,6 +121,7 @@ public class PlayerHealth : MonoBehaviour
         currentHealth += amount;
         currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
 
+        SaveHealthToSession();
         UpdateHealthUI();
     }
 
@@ -129,6 +141,26 @@ public class PlayerHealth : MonoBehaviour
         currentHealth += amount;
         currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
 
+        SaveHealthToSession();
+        UpdateHealthUI();
+    }
+
+    public void ApplyHealthBonus(int maxHealthBonus, int currentHealthBonus)
+    {
+        if (isDead)
+        {
+            return;
+        }
+
+        if (maxHealthBonus <= 0 && currentHealthBonus <= 0)
+        {
+            return;
+        }
+
+        maxHealth = Mathf.Max(1, maxHealth + Mathf.Max(0, maxHealthBonus));
+        currentHealth = Mathf.Clamp(currentHealth + Mathf.Max(0, currentHealthBonus), 0, maxHealth);
+
+        SaveHealthToSession();
         UpdateHealthUI();
     }
 
@@ -145,6 +177,27 @@ public class PlayerHealth : MonoBehaviour
         }
 
         healthUI.SetHealth(currentHealth, maxHealth);
+    }
+
+    private void ApplySessionHealth()
+    {
+        if (gameSession == null)
+        {
+            gameSession = GameSession.GetOrCreate();
+        }
+
+        maxHealth = gameSession.MaxHealth;
+        currentHealth = gameSession.CurrentHealth;
+    }
+
+    private void SaveHealthToSession()
+    {
+        if (gameSession == null)
+        {
+            gameSession = GameSession.GetOrCreate();
+        }
+
+        gameSession.SetHealth(currentHealth, maxHealth);
     }
 
     private void PlayHitFlash()
@@ -184,6 +237,13 @@ public class PlayerHealth : MonoBehaviour
         UpdateHealthUI();
 
         PlayerPrefs.SetString("LastPlayedLevel", SceneManager.GetActiveScene().name);
+
+        if (gameSession == null)
+        {
+            gameSession = GameSession.GetOrCreate();
+        }
+
+        gameSession.ResetToInitialState();
         SceneManager.LoadScene(deathMenuSceneName);
     }
 }

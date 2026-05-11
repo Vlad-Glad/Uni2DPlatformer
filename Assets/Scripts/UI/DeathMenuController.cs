@@ -11,6 +11,7 @@ public class DeathMenuController : MonoBehaviour
         Time.timeScale = 1f;
 
         string levelToLoad = PlayerPrefs.GetString("LastPlayedLevel", defaultLevelName);
+        GameSession.GetOrCreate().StartNewRun(levelToLoad);
         SceneManager.LoadScene(levelToLoad);
     }
     public void BackToMainMenu()

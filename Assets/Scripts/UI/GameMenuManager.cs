@@ -101,6 +101,7 @@ public class GameMenuManager : MonoBehaviour
 
         Time.timeScale = 1f;
 
+        GameSession.GetOrCreate().StartNewRun(firstLevelSceneName);
         SceneManager.LoadScene(firstLevelSceneName);
     }
 
