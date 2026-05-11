@@ -77,6 +77,11 @@ public class GameMenuManager : MonoBehaviour
             return;
         }
 
+        if (IsLevelResultOpen())
+        {
+            return;
+        }
+
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             if (isPaused)
@@ -107,7 +112,7 @@ public class GameMenuManager : MonoBehaviour
 
     public void ResumeGame()
     {
-        if (!isInGame)
+        if (!isInGame || IsLevelResultOpen())
         {
             return;
         }
@@ -123,7 +128,7 @@ public class GameMenuManager : MonoBehaviour
 
     public void ShowPauseMenu()
     {
-        if (!isInGame)
+        if (!isInGame || IsLevelResultOpen())
         {
             return;
         }
@@ -231,6 +236,12 @@ public class GameMenuManager : MonoBehaviour
         {
             hudCanvas.SetActive(visible);
         }
+    }
+
+    private static bool IsLevelResultOpen()
+    {
+        LevelTimerManager timerManager = LevelTimerManager.Instance;
+        return timerManager != null && timerManager.FinishReached;
     }
 
     private void ShowExternalMenuScene()

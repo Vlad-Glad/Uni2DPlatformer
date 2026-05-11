@@ -174,9 +174,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c6d38f9e9b3a48fca74a21a7682bb00d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HouseLevelExit
-  interactKey: 101
   nextLevelSceneName: 
-  promptText: To start next level press E
 --- !u!1001 &6742784138646315338
 PrefabInstance:
   m_ObjectHideFlags: 0

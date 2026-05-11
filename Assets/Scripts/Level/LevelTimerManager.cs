@@ -1,5 +1,4 @@
 using System.IO;
-using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -8,30 +7,27 @@ public class LevelTimerManager : MonoBehaviour
     public static LevelTimerManager Instance { get; private set; }
 
     [Header("UI")]
-    [SerializeField] private TMP_Text timerText;
-    [SerializeField] private TMP_Text continuePromptText;
+    [SerializeField] private LevelHUD levelHud;
 
     [Header("Interaction")]
+    [SerializeField] private KeyCode continueKey = KeyCode.E;
     [SerializeField] private string nextLevelSceneName = "";
-    [SerializeField] private string continuePrompt = "To start next level press E";
-
-    [Header("Bonus")]
-    [SerializeField] private float bonusTimeLimit = 30f;
-    [SerializeField] private int bonusMaxHealth = 1;
-    [SerializeField] private int bonusCurrentHealth = 1;
+    [SerializeField] private string continuePrompt = "Press E to continue";
 
     private PlayerMovement playerMovement;
     private float elapsedTime;
     private bool timerStarted;
     private bool timerRunning;
     private bool finishReached;
-    private bool isExitPromptVisible;
     private bool bonusApplied;
+    private bool isLoadingNextLevel;
 
     public float ElapsedTime => elapsedTime;
     public bool IsRunning => timerRunning;
     public bool FinishReached => finishReached;
     public bool BonusApplied => bonusApplied;
+    private float BonusTimeLimit => levelHud != null ? levelHud.BonusTimeLimit : 30f;
+    private int BonusHealthAmount => levelHud != null ? levelHud.BonusHealthAmount : 1;
 
     private void Awake()
     {
@@ -46,9 +42,15 @@ public class LevelTimerManager : MonoBehaviour
 
     private void Start()
     {
+        if (levelHud == null)
+        {
+            ConfigureHud(FindFirstObjectByType<LevelHUD>());
+        }
+
         BindToPlayer(FindFirstObjectByType<PlayerMovement>());
         UpdateTimerText();
-        SetContinuePromptVisible(false);
+        UpdateBonusTargetText();
+        HideResultPanel();
     }
 
     private void Update()
@@ -57,6 +59,11 @@ public class LevelTimerManager : MonoBehaviour
         {
             elapsedTime += Time.deltaTime;
             UpdateTimerText();
+        }
+
+        if (finishReached && !isLoadingNextLevel && Input.GetKeyDown(continueKey))
+        {
+            LoadNextLevel();
         }
     }
 
@@ -73,20 +80,26 @@ public class LevelTimerManager : MonoBehaviour
         }
     }
 
-    public void ConfigureUi(TMP_Text newTimerText, TMP_Text newContinuePromptText)
+    public void ConfigureHud(LevelHUD newLevelHud)
     {
-        if (timerText == null)
+        if (newLevelHud == null)
         {
-            timerText = newTimerText;
+            return;
         }
 
-        if (continuePromptText == null)
-        {
-            continuePromptText = newContinuePromptText;
-        }
-
+        levelHud = newLevelHud;
+        levelHud.EnsureUi();
         UpdateTimerText();
-        SetContinuePromptVisible(isExitPromptVisible);
+        UpdateBonusTargetText();
+
+        if (finishReached)
+        {
+            ShowResultPanel();
+        }
+        else
+        {
+            HideResultPanel();
+        }
     }
 
     public void BindToPlayer(PlayerMovement newPlayerMovement)
@@ -145,7 +158,9 @@ public class LevelTimerManager : MonoBehaviour
         timerRunning = false;
 
         TryApplyTimeBonus();
+        PauseGameplayAfterFinish();
         UpdateTimerText();
+        ShowResultPanel();
     }
 
     public void ShowExitPrompt(string promptText)
@@ -160,22 +175,22 @@ public class LevelTimerManager : MonoBehaviour
             continuePrompt = promptText;
         }
 
-        isExitPromptVisible = true;
-        SetContinuePromptVisible(true);
+        ShowResultPanel();
     }
 
     public void HideExitPrompt()
     {
-        isExitPromptVisible = false;
-        SetContinuePromptVisible(false);
     }
 
     public void LoadNextLevel()
     {
+        isLoadingNextLevel = true;
+
         string sceneName = ResolveNextLevelSceneName();
 
         if (string.IsNullOrWhiteSpace(sceneName))
         {
+            isLoadingNextLevel = false;
             Debug.LogWarning("No next gameplay scene is configured or available in Build Settings.");
             return;
         }
@@ -188,7 +203,14 @@ public class LevelTimerManager : MonoBehaviour
 
     private void TryApplyTimeBonus()
     {
-        if (bonusApplied || !timerStarted || elapsedTime > bonusTimeLimit)
+        if (bonusApplied || !timerStarted || elapsedTime > BonusTimeLimit)
+        {
+            return;
+        }
+
+        int bonusHealthAmount = BonusHealthAmount;
+
+        if (bonusHealthAmount <= 0)
         {
             return;
         }
@@ -198,11 +220,26 @@ public class LevelTimerManager : MonoBehaviour
         PlayerHealth playerHealth = FindFirstObjectByType<PlayerHealth>();
         if (playerHealth != null)
         {
-            playerHealth.ApplyHealthBonus(bonusMaxHealth, bonusCurrentHealth);
+            playerHealth.ApplyHealingItem(bonusHealthAmount);
             return;
         }
 
-        GameSession.GetOrCreate().ApplyHealthBonus(bonusMaxHealth, bonusCurrentHealth);
+        GameSession.GetOrCreate().ApplyHealingItem(bonusHealthAmount);
+    }
+
+    private void PauseGameplayAfterFinish()
+    {
+        if (playerMovement == null)
+        {
+            playerMovement = FindFirstObjectByType<PlayerMovement>();
+        }
+
+        if (playerMovement != null)
+        {
+            playerMovement.SetInputEnabled(false);
+        }
+
+        Time.timeScale = 0f;
     }
 
     private string ResolveNextLevelSceneName()
@@ -254,28 +291,55 @@ public class LevelTimerManager : MonoBehaviour
         return sceneName == "Menu" || sceneName == "DeathMenu";
     }
 
-    private void SetContinuePromptVisible(bool isVisible)
+    private void ShowResultPanel()
     {
-        if (continuePromptText == null)
+        if (levelHud == null)
         {
             return;
         }
 
-        continuePromptText.text = continuePrompt;
-        continuePromptText.gameObject.SetActive(isVisible);
+        levelHud.ShowResult(
+            FormatTime(elapsedTime),
+            FormatTime(BonusTimeLimit),
+            bonusApplied,
+            continuePrompt
+        );
+    }
+
+    private void HideResultPanel()
+    {
+        if (levelHud != null)
+        {
+            levelHud.HideResult();
+        }
     }
 
     private void UpdateTimerText()
     {
-        if (timerText == null)
+        if (levelHud == null)
         {
             return;
         }
 
-        int minutes = Mathf.FloorToInt(elapsedTime / 60f);
-        int seconds = Mathf.FloorToInt(elapsedTime % 60f);
-        int hundredths = Mathf.FloorToInt((elapsedTime * 100f) % 100f);
+        levelHud.SetTimerText(FormatTime(elapsedTime));
+    }
 
-        timerText.text = string.Format("Time: {0:00}:{1:00}.{2:00}", minutes, seconds, hundredths);
+    private void UpdateBonusTargetText()
+    {
+        if (levelHud == null)
+        {
+            return;
+        }
+
+        levelHud.SetBonusTargetText(FormatTime(BonusTimeLimit));
+    }
+
+    private static string FormatTime(float time)
+    {
+        int minutes = Mathf.FloorToInt(time / 60f);
+        int seconds = Mathf.FloorToInt(time % 60f);
+        int hundredths = Mathf.FloorToInt((time * 100f) % 100f);
+
+        return string.Format("{0:00}:{1:00}.{2:00}", minutes, seconds, hundredths);
     }
 }

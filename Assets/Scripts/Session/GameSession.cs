@@ -82,14 +82,21 @@ public class GameSession : MonoBehaviour
         currentHealth = Mathf.Clamp(newCurrentHealth, 0, maxHealth);
     }
 
-    public void ApplyHealthBonus(int maxHealthBonus, int currentHealthBonus)
+    public void ApplyHealingItem(int amount)
     {
-        if (maxHealthBonus <= 0 && currentHealthBonus <= 0)
+        if (amount <= 0)
         {
             return;
         }
 
-        maxHealth = Mathf.Max(1, maxHealth + Mathf.Max(0, maxHealthBonus));
-        currentHealth = Mathf.Clamp(currentHealth + Mathf.Max(0, currentHealthBonus), 0, maxHealth);
+        if (currentHealth >= maxHealth)
+        {
+            maxHealth += amount;
+            currentHealth = Mathf.Clamp(currentHealth + amount, 0, maxHealth);
+        }
+        else
+        {
+            currentHealth = Mathf.Clamp(currentHealth + amount, 0, maxHealth);
+        }
     }
 }

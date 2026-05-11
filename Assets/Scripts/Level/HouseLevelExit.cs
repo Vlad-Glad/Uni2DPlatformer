@@ -3,9 +3,7 @@ using UnityEngine;
 [RequireComponent(typeof(CircleCollider2D))]
 public class HouseLevelExit : MonoBehaviour
 {
-    [SerializeField] private KeyCode interactKey = KeyCode.E;
     [SerializeField] private string nextLevelSceneName = "";
-    [SerializeField] private string promptText = "To start next level press E";
 
     private LevelTimerManager timerManager;
     private bool playerInRange;
@@ -25,21 +23,14 @@ public class HouseLevelExit : MonoBehaviour
 
         LevelTimerManager activeTimerManager = GetTimerManager();
 
-        if (activeTimerManager == null || !activeTimerManager.FinishReached)
+        if (activeTimerManager == null)
         {
             return;
         }
 
-        activeTimerManager.ShowExitPrompt(promptText);
-
-        if (Input.GetKeyDown(interactKey))
+        if (!string.IsNullOrWhiteSpace(nextLevelSceneName))
         {
-            if (!string.IsNullOrWhiteSpace(nextLevelSceneName))
-            {
-                activeTimerManager.SetNextLevelSceneName(nextLevelSceneName);
-            }
-
-            activeTimerManager.LoadNextLevel();
+            activeTimerManager.SetNextLevelSceneName(nextLevelSceneName);
         }
     }
 
@@ -61,21 +52,10 @@ public class HouseLevelExit : MonoBehaviour
         }
 
         playerInRange = false;
-
-        LevelTimerManager activeTimerManager = GetTimerManager();
-        if (activeTimerManager != null)
-        {
-            activeTimerManager.HideExitPrompt();
-        }
     }
 
     private void OnDisable()
     {
-        LevelTimerManager activeTimerManager = GetTimerManager();
-        if (activeTimerManager != null)
-        {
-            activeTimerManager.HideExitPrompt();
-        }
     }
 
     private LevelTimerManager GetTimerManager()

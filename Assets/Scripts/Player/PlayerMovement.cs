@@ -24,6 +24,7 @@ public class PlayerMovement : MonoBehaviour
     private float moveInput;
     private bool jumpPressed;
     private bool hasTouchedGround;
+    private bool inputEnabled = true;
     private static PhysicsMaterial2D noFrictionMaterial;
 
     public bool HasTouchedGround => hasTouchedGround;
@@ -38,6 +39,13 @@ public class PlayerMovement : MonoBehaviour
 
     private void Update()
     {
+        if (!inputEnabled)
+        {
+            moveInput = 0f;
+            jumpPressed = false;
+            return;
+        }
+
         moveInput = Input.GetAxisRaw("Horizontal");
 
         if (Input.GetKeyDown(KeyCode.Space))
@@ -66,6 +74,27 @@ public class PlayerMovement : MonoBehaviour
         }
 
         jumpPressed = false;
+    }
+
+    public void SetInputEnabled(bool enabled)
+    {
+        inputEnabled = enabled;
+
+        if (enabled)
+        {
+            return;
+        }
+
+        moveInput = 0f;
+        jumpPressed = false;
+
+        if (rb == null)
+        {
+            return;
+        }
+
+        rb.linearVelocity = Vector2.zero;
+        rb.angularVelocity = 0f;
     }
 
     private void Move()

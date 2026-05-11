@@ -145,23 +145,26 @@ public class PlayerHealth : MonoBehaviour
         UpdateHealthUI();
     }
 
-    public void ApplyHealthBonus(int maxHealthBonus, int currentHealthBonus)
+    public void ApplyHealingItem(int amount)
     {
         if (isDead)
         {
             return;
         }
 
-        if (maxHealthBonus <= 0 && currentHealthBonus <= 0)
+        if (amount <= 0)
         {
             return;
         }
 
-        maxHealth = Mathf.Max(1, maxHealth + Mathf.Max(0, maxHealthBonus));
-        currentHealth = Mathf.Clamp(currentHealth + Mathf.Max(0, currentHealthBonus), 0, maxHealth);
-
-        SaveHealthToSession();
-        UpdateHealthUI();
+        if (currentHealth >= maxHealth)
+        {
+            AddMaxHealth(amount);
+        }
+        else
+        {
+            Heal(amount);
+        }
     }
 
     private void UpdateHealthUI()
